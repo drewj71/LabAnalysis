@@ -1,6 +1,6 @@
-// src/components/LoginForm.tsx
+// src/components/ForgotPasswordForm.tsx
+import React from "react";
 import { useForm } from "react-hook-form";
-import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Card,
@@ -8,30 +8,45 @@ import {
   CardTitle,
   CardContent,
   CardFooter,
-  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
+import api from "@/api";
 
-interface  ForgotPasswordFormValues {
+interface ForgotPasswordFormValues {
   email: string;
 }
 
 export const ForgotPasswordForm: React.FC = () => {
   const { register: registerInput, handleSubmit } = useForm<ForgotPasswordFormValues>();
-  const { login } = useAuth();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const [cooldown, setCooldown] = React.useState(0);
+
+  React.useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const interval = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [cooldown]);
 
   const onSubmit = async (data: ForgotPasswordFormValues) => {
-    // try {
-    //   await login(data.email, data.password);
-    //   navigate({ to: "/dashboard" });
-    // } catch (err) {
-    //   toast.error("Login failed. Please check your credentials and try again.");
-    //   console.error(err);
-    // }
+    try {
+      await api.post("/auth/forgot-password", { email: data.email }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      toast.success("Reset password email sent successfully!");
+      setCooldown(30);
+    } catch (err) {
+      toast.error("Failed to send reset password email. Please try again later.");
+      console.error(err);
+    }
   };
 
   return (
@@ -56,9 +71,17 @@ export const ForgotPasswordForm: React.FC = () => {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
-            <Button type="submit" className="w-full cursor-pointer">
-              Send Email
+            <Button type="submit" className="w-full cursor-pointer" disabled={cooldown > 0}>
+              {cooldown > 0 ? `Resend in ${cooldown}s` : "Send Email"}
             </Button>
+            <div className="flex justify-between w-full">
+              <Button variant="link" className="px-0 text-sm cursor-pointer" onClick={() => window.location.href = '/'}>
+                Login
+              </Button>
+              <Button variant="link" className="px-0 text-sm cursor-pointer" onClick={() => window.location.href = '/register'}>
+                Register
+              </Button>
+            </div>
           </CardFooter>
         </form>
       </Card>

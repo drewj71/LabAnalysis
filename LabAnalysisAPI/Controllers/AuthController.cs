@@ -18,9 +18,9 @@ namespace LabAnalysisAPI.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _config;
         private readonly FrontendOptions _frontend;
-        private readonly BrevoEmailService _emailService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(UserManager<IdentityUser> userManager, IConfiguration config, IOptions<FrontendOptions> frontendOptions, BrevoEmailService emailService)
+        public AuthController(UserManager<IdentityUser> userManager, IConfiguration config, IOptions<FrontendOptions> frontendOptions, IEmailService emailService)
         {
             _userManager = userManager;
             _config = config;
@@ -89,7 +89,8 @@ namespace LabAnalysisAPI.Controllers
 
             var user = await _userManager.FindByEmailAsync(dto.Email);
             
-            if (user == null || !await _userManager.IsEmailConfirmedAsync(user))
+            // Ensure that users confirm they're email after registering, then this line can be readded
+            if (user == null) // !await _userManager.IsEmailConfirmedAsync(user) 
             {
                 // To prevent email enumeration, we return the same response
                 return Ok("Password reset link has been sent to your email.");

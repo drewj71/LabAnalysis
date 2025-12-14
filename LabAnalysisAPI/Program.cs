@@ -47,10 +47,13 @@ builder.Services.AddAuthentication(options =>
 
 // 4️⃣ Authorization
 builder.Services.AddAuthorization();
-
+builder.Services.AddHttpClient<IEmailService, BrevoEmailService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.brevo.com/v3/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection("Frontend"));
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
-builder.Services.AddHttpClient<BrevoEmailService>();
 
 builder.Services.AddCors(options =>
 {
