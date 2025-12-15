@@ -55,6 +55,16 @@ namespace LabAnalysisAPI.Controllers
 
             var token = GenerateJwtToken(user);
 
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = $"{_frontend.BaseUrl}/confirm-email" +
+                $"?email={Uri.EscapeDataString(user.Email!)}" +
+                $"&token={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken))}";
+
+            // Send confirmation email
+            await _emailService.SendConfirmationEmailAsync(
+                user.Email!,
+                confirmationLink);
+
             return Ok(new
             {
                 token,

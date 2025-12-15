@@ -6,5 +6,6 @@ namespace LabAnalysisAPI.Models
         public string SenderEmail { get; set; } = default!;
         public string SenderName { get; set; } = default!;
         public int PasswordResetTemplateId { get; set; } = default!;
+        public int ConfirmationTemplateId { get; set; } = default!;
     }
 }

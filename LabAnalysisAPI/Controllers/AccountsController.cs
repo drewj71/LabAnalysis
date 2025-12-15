@@ -8,20 +8,44 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Net;
 
 namespace LabAnalysisAPI.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
     [Authorize]
-    public class AccountsController: ControllerBase
+    public class AccountsController : ControllerBase
     {
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly AppDbContext _db;
 
-        public AccountsController(AppDbContext db)
+        public AccountsController(UserManager<IdentityUser> userManager, AppDbContext db)
         {
+            _userManager = userManager;
             _db = db;
         }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(
+            [FromQuery] string email,
+            [FromQuery] string token)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return NotFound("User not found.");
+
+            var decodedToken = WebUtility.UrlDecode(token);
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (!result.Succeeded)
+                return BadRequest("Email confirmation failed.");
+
+            return Ok("Email confirmed successfully.");
+        }
+
 
         // [HttpGet("user-accounts")]
         // public async Task<IActionResult> GetUserAccounts()

@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
-import axios from "axios";
+import api from "@/api";
 
 interface ResetPasswordFormValues {
   password: string;
@@ -49,10 +49,14 @@ export const ResetPasswordForm: React.FC = () => {
     }
 
     try {
-      await axios.post("/api/auth/reset-password", {
+      await api.post("/auth/reset-password", {
         email,
         token,
         newPassword: data.password,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       toast.success("Password reset successfully!");

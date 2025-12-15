@@ -3,6 +3,7 @@ import { LoginForm } from '../components/authentication/LoginForm'
 import { RegisterForm } from '../components/authentication/RegisterForm'
 import { ForgotPasswordForm } from '../components/authentication/ForgotPasswordForm'
 import { ResetPasswordForm } from '../components/authentication/ResetPasswordForm'
+import { EmailConfirmation } from '../components/authentication/EmailConfirmation'
 import { Dashboard } from '../components/Dashboard'
 import { Accounts } from '../components/Accounts'
 import { Budgets } from '../components/Budgets'
@@ -34,6 +35,12 @@ export const resetPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/reset-password',
   component: ResetPasswordForm
+})
+
+export const emailConfirmationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/confirm-email',
+  component: EmailConfirmation,
 })
 
 const dashboardRoute = createRoute({
@@ -107,7 +114,7 @@ const rootRoute = createRootRoute({
 })
 
 // Build the route tree
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, forgotPasswordRoute, resetPasswordRoute, dashboardRoute, accountsRoute, budgetsRoute, transactionsRoute, settingsRoute])
+const routeTree = rootRoute.addChildren([indexRoute, registerRoute, forgotPasswordRoute, resetPasswordRoute, emailConfirmationRoute, dashboardRoute, accountsRoute, budgetsRoute, transactionsRoute, settingsRoute])
 
 // Create router with the complete route tree
 export const router = createRouter({

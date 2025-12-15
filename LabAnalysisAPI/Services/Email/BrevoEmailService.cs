@@ -18,7 +18,7 @@ namespace LabAnalysisAPI.Services.Email
             _logger = logger;
         }
 
-        public async Task SendPasswordResetAsync(string toEmail, string resetLink)
+        public async Task SendEmailTemplateAsync(string toEmail, string subject, int templateId, object parameters)
         {
             var payload = new
             {
@@ -34,12 +34,9 @@ namespace LabAnalysisAPI.Services.Email
                         email = toEmail,
                     }
                 },
-                subject = "Reset Your Password",
-                templateId = _emailOptions.PasswordResetTemplateId,
-                @params = new
-                {
-                    resetLink
-                }
+                subject,
+                templateId,
+                @params = parameters
             };
 
             var request = new HttpRequestMessage(HttpMethod.Post, "smtp/email")
@@ -57,15 +54,33 @@ namespace LabAnalysisAPI.Services.Email
                 {
                     var body = await response.Content.ReadAsStringAsync();
                     _logger.LogError(
-                        "Brevo reset password email failed to send. Status: {Status}. Response: {Response}",
+                        "Brevo email template failed to send. Status: {Status}. Response: {Response}",
                         response.StatusCode,
                         body);
                 }
-            } 
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error sending Brevo reset password email.");
+                _logger.LogError(ex, "Error sending Brevo email template.");
             }
         }
-    }
+
+        public async Task SendPasswordResetAsync(string toEmail, string resetLink)
+        {
+            await SendEmailTemplateAsync(
+                toEmail,
+                "Password Reset Request",
+                _emailOptions.PasswordResetTemplateId,
+                new { resetLink });
+        }
+
+        public async Task SendConfirmationEmailAsync(string toEmail, string confirmationLink)
+        {
+            await SendEmailTemplateAsync(
+                toEmail,
+                "Email Confirmation",
+                _emailOptions.ConfirmationTemplateId,
+                new { confirmationLink });
+        }
+    }    
 }

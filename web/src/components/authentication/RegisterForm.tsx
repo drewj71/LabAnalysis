@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { AxiosError } from "axios";
+import toast from "react-hot-toast";
 
 interface RegisterFormValues {
   email: string;
@@ -33,6 +34,7 @@ export const RegisterForm: React.FC = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       await registerUser(data.email, data.password);
+      toast.success("Please check your email to confirm your account.");
       navigate({ to: "/dashboard" });
     } catch (err: AxiosError | any) {
       if (err.response?.data) {
