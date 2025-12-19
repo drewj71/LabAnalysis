@@ -9,6 +9,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Net;
+using Microsoft.AspNetCore.WebUtilities;
+using LabAnalysisAPI.Services.Email;
+using Microsoft.Extensions.Options;
 
 namespace LabAnalysisAPI.Controllers
 {
@@ -19,11 +22,15 @@ namespace LabAnalysisAPI.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppDbContext _db;
+        private readonly FrontendOptions _frontend;
+        private readonly IEmailService _emailService;
 
-        public AccountsController(UserManager<IdentityUser> userManager, AppDbContext db)
+        public AccountsController(UserManager<IdentityUser> userManager, AppDbContext db, IOptions<FrontendOptions> frontendOptions, IEmailService emailService)
         {
             _userManager = userManager;
             _db = db;
+            _frontend = frontendOptions.Value;
+            _emailService = emailService;
         }
 
         [HttpGet("confirm-email")]
@@ -36,7 +43,8 @@ namespace LabAnalysisAPI.Controllers
             if (user == null)
                 return NotFound("User not found.");
 
-            var decodedToken = WebUtility.UrlDecode(token);
+            var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+            var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
 
             var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
@@ -44,6 +52,31 @@ namespace LabAnalysisAPI.Controllers
                 return BadRequest("Email confirmation failed.");
 
             return Ok("Email confirmed successfully.");
+        }
+
+        [HttpGet("resend-confirm-email")]
+        public async Task<IActionResult> ResendConfirmEmail(
+            [FromQuery] string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return NotFound("User not found.");
+
+            if (user.EmailConfirmed)
+                return BadRequest("Email already confirmed.");
+
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = $"{_frontend.BaseUrl}/confirm-email" +
+                $"?email={Uri.EscapeDataString(user.Email!)}" +
+                $"&token={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken))}";
+
+            // Send confirmation email
+            await _emailService.SendConfirmationEmailAsync(
+                user.Email!,
+                confirmationLink);
+
+            return Ok("Email confirmation link sent successfully.");
         }
 
 

@@ -1,7 +1,7 @@
 // src/components/LoginForm.tsx
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Link } from "@tanstack/react-router";
 import {
   Card,
   CardHeader,
@@ -19,10 +19,10 @@ interface LoginFormValues {
   password: string;
 }
 
-export const LoginForm: React.FC = () => {
+export function LoginForm() {
   const { register: registerInput, handleSubmit } = useForm<LoginFormValues>();
   const { login } = useAuth();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
@@ -71,11 +71,11 @@ export const LoginForm: React.FC = () => {
               Login
             </Button>
             <div className="flex justify-between w-full">
-              <Button variant="link" className="px-0 text-sm cursor-pointer" onClick={() => window.location.href = '/register'}>
-                Register
+              <Button asChild variant="link" className="px-0 text-sm">
+                <Link to="/register">Register</Link>
               </Button>
-              <Button variant="link" className="px-0 text-sm cursor-pointer" onClick={() => window.location.href = '/forgot-password'}>
-                Forgot password?
+              <Button asChild variant="link" className="px-0 text-sm">
+                <Link to="/forgot-password">Forgot password?</Link>
               </Button>
             </div>
           </CardFooter>

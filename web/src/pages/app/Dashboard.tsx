@@ -1,18 +1,26 @@
 // src/components/Dashboard.tsx
 import React from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@tanstack/react-router";
+// import api from "@/api";
+// import toast from "react-hot-toast";
 
 export const Dashboard: React.FC = () => {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const navigate = useNavigate();
 
     const handleLogout = () => {
         logout();
-        navigate({ to: "/" });
+        navigate({ to: "/login", replace: true });
     };
+
+    // const handleResendEmailConfirmation = async () => {
+    //     await api.get("/accounts/resend-confirm-email", {params: { email: user?.email }
+    //     });
+    //     toast.success("Email confirmation sent successfully!");
+    // }
 
     return (
         <div className="min-h-screen flex bg-gray-50">
@@ -21,6 +29,7 @@ export const Dashboard: React.FC = () => {
                 {/* Welcome header */}
                 <div className="flex justify-between items-center">
                     <h1 className="text-3xl font-semibold">Welcome, User!</h1>
+                    {/* <Button className="cursor-pointer" onClick={handleResendEmailConfirmation}>Resend Email Confirmation</Button> */}
                     <Button className="cursor-pointer" onClick={handleLogout}>Log Out</Button>
                 </div>
 

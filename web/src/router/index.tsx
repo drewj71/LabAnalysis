@@ -1,133 +1,181 @@
-import { createRootRoute, createRoute, createRouter, RouterProvider, Outlet } from '@tanstack/react-router'
-import { LoginForm } from '../components/authentication/LoginForm'
-import { RegisterForm } from '../components/authentication/RegisterForm'
-import { ForgotPasswordForm } from '../components/authentication/ForgotPasswordForm'
-import { ResetPasswordForm } from '../components/authentication/ResetPasswordForm'
-import { EmailConfirmation } from '../components/authentication/EmailConfirmation'
-import { Dashboard } from '../components/Dashboard'
-import { Accounts } from '../components/Accounts'
-import { Budgets } from '../components/Budgets'
-import { Transactions } from '../components/Transactions'
-import { Settings } from '../components/Settings'
-import { useAuth } from '../hooks/useAuth'
-import { MainLayout } from '@/components/MainLayout'
+// src/router.tsx
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  RouterProvider,
+  Outlet,
+  Navigate,
+} from '@tanstack/react-router'
 
-// Define child routes first
-const indexRoute = createRoute({
+import { useAuth } from '@/hooks/useAuth'
+
+// Auth / public pages
+import Login from '@/pages/auth/Login'
+import Register from '@/pages/auth/Register'
+import ForgotPassword from '@/pages/auth/ForgotPassword'
+import ResetPassword from '@/pages/auth/ResetPassword'
+import EmailConfirmation from '@/pages/auth/EmailConfirmation'
+
+// App pages
+import { Dashboard } from '@/pages/app/Dashboard'
+import { Accounts } from '@/pages/app/Accounts'
+import { Budgets } from '@/pages/app/Budgets'
+import { Transactions } from '@/pages/app/Transactions'
+import { Settings } from '@/pages/app/Settings'
+
+// Layout
+import { MainLayout } from '@/layouts/MainLayout'
+import { LandingLayout } from '@/layouts/LandingLayout'
+
+/* -----------------------------------------------------
+   Root route
+----------------------------------------------------- */
+
+const rootRoute = createRootRoute({
+  component: Outlet,
+})
+
+/* -----------------------------------------------------
+   Public routes
+----------------------------------------------------- */
+
+const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: LoginForm,
+  component: () => {
+    const { token } = useAuth()
+
+    if (token) return <Navigate to="/dashboard" />
+
+    return <LandingLayout />
+  },
+})
+
+const loginRoute = createRoute({
+  getParentRoute: () => landingRoute,
+  path: '/login',
+  component: Login,
 })
 
 const registerRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => landingRoute,
   path: '/register',
-  component: RegisterForm,
+  component: Register,
 })
 
 const forgotPasswordRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => landingRoute,
   path: '/forgot-password',
-  component: ForgotPasswordForm,
+  component: ForgotPassword,
 })
 
-export const resetPasswordRoute = createRoute({
-  getParentRoute: () => rootRoute,
+const resetPasswordRoute = createRoute({
+  getParentRoute: () => landingRoute,
   path: '/reset-password',
-  component: ResetPasswordForm
+  component: ResetPassword,
 })
 
-export const emailConfirmationRoute = createRoute({
-  getParentRoute: () => rootRoute,
+const emailConfirmationRoute = createRoute({
+  getParentRoute: () => landingRoute,
   path: '/confirm-email',
   component: EmailConfirmation,
 })
 
-const dashboardRoute = createRoute({
+/* -----------------------------------------------------
+   Authenticated app route (THE KEY CHANGE)
+----------------------------------------------------- */
+
+const appRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/dashboard',
+  id: 'app',
   component: () => {
     const { token } = useAuth()
-    if (!token) {
-      window.location.href = '/'
-      return null
-    }
-    return <MainLayout><Dashboard /></MainLayout>
+
+    if (!token) return <Navigate to="/" />
+
+    return <MainLayout />
   },
+})
+
+/* -----------------------------------------------------
+   App child routes
+----------------------------------------------------- */
+
+const dashboardRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/dashboard',
+  component: Dashboard,
 })
 
 const accountsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appRoute,
   path: '/accounts',
-  component: () => {
-    const { token } = useAuth()
-    if (!token) {
-      window.location.href = '/'
-      return null
-    }
-    return <MainLayout><Accounts /></MainLayout>
-  },
+  component: Accounts,
 })
 
 const budgetsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appRoute,
   path: '/budgets',
-  component: () => {
-    const { token } = useAuth()
-    if (!token) {
-      window.location.href = '/'
-      return null
-    }
-    return <MainLayout><Budgets /></MainLayout>
-  },
+  component: Budgets,
 })
 
 const transactionsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appRoute,
   path: '/transactions',
-  component: () => {
-    const { token } = useAuth()
-    if (!token) {
-      window.location.href = '/'
-      return null
-    }
-    return <MainLayout><Transactions /></MainLayout>
-  },
+  component: Transactions,
 })
 
 const settingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => appRoute,
   path: '/settings',
-  component: () => {
-    const { token } = useAuth()
-    if (!token) {
-      window.location.href = '/'
-      return null
-    }
-    return <MainLayout><Settings /></MainLayout>
-  },
+  component: Settings,
 })
 
-// Root route with children
-const rootRoute = createRootRoute({
-  component: () => <Outlet />,
-})
+/* -----------------------------------------------------
+   Route tree
+----------------------------------------------------- */
 
-// Build the route tree
-const routeTree = rootRoute.addChildren([indexRoute, registerRoute, forgotPasswordRoute, resetPasswordRoute, emailConfirmationRoute, dashboardRoute, accountsRoute, budgetsRoute, transactionsRoute, settingsRoute])
+const routeTree = rootRoute.addChildren([
+  landingRoute.addChildren([
+    loginRoute,
+    registerRoute,
+    forgotPasswordRoute,
+    resetPasswordRoute,
+    emailConfirmationRoute,
+  ]),
+  appRoute.addChildren([
+    dashboardRoute,
+    accountsRoute,
+    budgetsRoute,
+    transactionsRoute,
+    settingsRoute,
+  ]),
+])
 
-// Create router with the complete route tree
+/* -----------------------------------------------------
+   Router
+----------------------------------------------------- */
+
 export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
 })
 
-// Type declaration for better TypeScript support
+/* -----------------------------------------------------
+   Type safety
+----------------------------------------------------- */
+
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
   }
 }
 
-// AppRouter component
-export const AppRouter: React.FC = () => <RouterProvider router={router} />
+/* -----------------------------------------------------
+   Provider
+----------------------------------------------------- */
+
+export function AppRouter() {
+  return <RouterProvider router={router} />
+}

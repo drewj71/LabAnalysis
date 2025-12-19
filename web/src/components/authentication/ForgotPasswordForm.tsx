@@ -1,7 +1,7 @@
 // src/components/ForgotPasswordForm.tsx
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   Card,
   CardHeader,
@@ -19,9 +19,8 @@ interface ForgotPasswordFormValues {
   email: string;
 }
 
-export const ForgotPasswordForm: React.FC = () => {
+export function ForgotPasswordForm() {
   const { register: registerInput, handleSubmit } = useForm<ForgotPasswordFormValues>();
-  const navigate = useNavigate();
   const [cooldown, setCooldown] = React.useState(0);
 
   React.useEffect(() => {
@@ -75,11 +74,11 @@ export const ForgotPasswordForm: React.FC = () => {
               {cooldown > 0 ? `Resend in ${cooldown}s` : "Send Email"}
             </Button>
             <div className="flex justify-between w-full">
-              <Button variant="link" className="px-0 text-sm cursor-pointer" onClick={() => window.location.href = '/'}>
-                Login
+              <Button asChild variant="link" className="px-0 text-sm">
+                <Link to="/login">Login</Link>
               </Button>
-              <Button variant="link" className="px-0 text-sm cursor-pointer" onClick={() => window.location.href = '/register'}>
-                Register
+              <Button asChild variant="link" className="px-0 text-sm">
+                <Link to="/register">Register</Link>
               </Button>
             </div>
           </CardFooter>

@@ -1,7 +1,6 @@
 // src/components/ResetPasswordForm.tsx
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { resetPasswordRoute } from "@/router";
 import {
   Card,
   CardHeader,
@@ -25,7 +24,7 @@ interface ResetPasswordSearch {
   token?: string;
 }
 
-export const ResetPasswordForm: React.FC = () => {
+export function ResetPasswordForm() {
   const {
     register,
     handleSubmit,
@@ -36,7 +35,7 @@ export const ResetPasswordForm: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const search = useSearch({ from: resetPasswordRoute as any }) as ResetPasswordSearch;
+  const search = useSearch({ from: '/reset-password' }) as ResetPasswordSearch;
   const { email, token } = search;
 
   const passwordValue = watch("password");
@@ -60,7 +59,7 @@ export const ResetPasswordForm: React.FC = () => {
       });
 
       toast.success("Password reset successfully!");
-      navigate({ to: "/login" as any });
+      navigate({ to: "/login" });
     } catch (err: any) {
       console.error(err);
       const message =

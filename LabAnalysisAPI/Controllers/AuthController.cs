@@ -98,7 +98,7 @@ namespace LabAnalysisAPI.Controllers
                 return BadRequest(ModelState);
 
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            
+
             // Ensure that users confirm they're email after registering, then this line can be readded
             if (user == null) // !await _userManager.IsEmailConfirmedAsync(user) 
             {
@@ -137,28 +137,35 @@ namespace LabAnalysisAPI.Controllers
             return Ok("Password has been reset successfully.");
         }
 
-        // --- Helper method to generate JWT ---
         private string GenerateJwtToken(IdentityUser user)
         {
-            var authClaims = new List<Claim>
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName!),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Email, user.Email!),
+                new("emailConfirmed", user.EmailConfirmed.ToString()),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
+            );
+
+            var creds = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
-                claims: authClaims,
+                claims: claims,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }

@@ -1,7 +1,7 @@
 // src/components/RegisterForm.tsx
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Link } from "@tanstack/react-router";
 import {
   Card,
   CardHeader,
@@ -18,22 +18,28 @@ import toast from "react-hot-toast";
 interface RegisterFormValues {
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
-export const RegisterForm: React.FC = () => {
+export function RegisterForm() {
   const {
-    register: registerInput,
+    register,
     handleSubmit,
     setError,
-    formState: { errors },
-  } = useForm<RegisterFormValues>();
+    watch,
+    formState: { errors, isValid },
+  } = useForm<RegisterFormValues>({
+    mode: "onChange",
+  });
 
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
+  const passwordValue = watch("password");
+  const confirmPasswordValue = watch("confirmPassword");
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
-      await registerUser(data.email, data.password);
+      await registerUser(data.email, data.password, data.confirmPassword);
       toast.success("Please check your email to confirm your account.");
       navigate({ to: "/dashboard" });
     } catch (err: AxiosError | any) {
@@ -59,6 +65,12 @@ export const RegisterForm: React.FC = () => {
     }
   };
 
+  const canSubmit =
+    isValid &&
+    passwordValue &&
+    confirmPasswordValue &&
+    passwordValue === confirmPasswordValue;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <Card className="w-full max-w-sm shadow-md">
@@ -75,7 +87,7 @@ export const RegisterForm: React.FC = () => {
                 id="email"
                 type="email"
                 placeholder="you@example.com"
-                {...registerInput("email")}
+                {...register("email")}
                 className={errors.email ? "border-red-500" : ""}
                 required
               />
@@ -90,9 +102,15 @@ export const RegisterForm: React.FC = () => {
                 id="password"
                 type="password"
                 placeholder="********"
-                {...registerInput("password")}
-                className={errors.password ? "border-red-500" : ""}
-                required
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 6, message: "At least 6 characters" },
+                  pattern: {
+                    value: /(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/,
+                    message:
+                      "Must include uppercase, lowercase, and special character",
+                  },
+                })}
               />
               {/* Password rules */}
               <ul className="text-sm mt-1 space-y-1">
@@ -118,19 +136,30 @@ export const RegisterForm: React.FC = () => {
                 <span className="text-red-500 text-sm">{errors.password.message}</span>
               )}
             </div>
-
+            <div className="grid gap-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="********"
+                {...register("confirmPassword", {
+                  required: "Confirm password is required",
+                  validate: (value) =>
+                    value === passwordValue || "Passwords do not match",
+                })}
+              />
+              {errors.confirmPassword && (
+                <span className="text-red-500 text-sm">{errors.confirmPassword.message}</span>
+              )}
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
-            <Button type="submit" className="w-full cursor-pointer">
+            <Button type="submit" className="w-full cursor-pointer" disabled={!canSubmit}>
               Register
             </Button>
             <div className="flex justify-center w-full">
-              <Button
-                variant="link"
-                className="px-0 text-sm cursor-pointer"
-                onClick={() => (window.location.href = "/")}
-              >
-                Already have an account? Login
+              <Button asChild variant="link" className="px-0 text-sm">
+                <Link to="/login">Already have an account? Login</Link>
               </Button>
             </div>
           </CardFooter>

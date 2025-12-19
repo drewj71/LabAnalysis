@@ -1,11 +1,14 @@
 // src/hooks/useAuth.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api, { setAuthToken } from "../api";
+import type { AuthUser } from "@/types/auth";
+import { decodeUser } from "@/lib/utils";
 
 interface AuthContextType {
   token: string | null;
+  user: AuthUser | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -15,9 +18,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("authToken")
   );
+  const [user, setUser] = useState<AuthUser | null>(
+    token ? decodeUser(token) : null
+  );
 
   useEffect(() => {
     setAuthToken(token);
+    setUser(token ? decodeUser(token) : null);
   }, [token]);
 
   const login = async (email: string, password: string) => {
@@ -31,8 +38,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(jwt);
   };
 
-  const register = async (email: string, password: string) => {
-    const res = await api.post("/auth/register", { email, password }, {
+  const register = async (email: string, password: string, confirmPassword: string) => {
+    const res = await api.post("/auth/register", { email, password, confirmPassword }, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -45,10 +52,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem("authToken");
     setToken(null);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, register, logout }}>
+    <AuthContext.Provider value={{ token, user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

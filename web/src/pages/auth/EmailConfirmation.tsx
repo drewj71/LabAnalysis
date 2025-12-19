@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { emailConfirmationRoute } from "@/router";
 import {
     Card,
     CardHeader,
@@ -15,30 +14,38 @@ interface EmailConfirmationSearch {
     token?: string;
 }
 
-export const EmailConfirmation: React.FC = () => {
+export default function EmailConfirmation() {
     const navigate = useNavigate();
-    const search = useSearch({ from: emailConfirmationRoute as any }) as EmailConfirmationSearch;
+    const search = useSearch({ from: '/confirm-email' }) as EmailConfirmationSearch;
     const { email, token } = search;
+    const hasSubmittedRef = React.useRef(false);
 
     React.useEffect(() => {
+        if (hasSubmittedRef.current) return;
+        hasSubmittedRef.current = true;
+
         const submitEmailConfirmation = async () => {
             if (!email || !token) {
                 toast.error("Invalid email confirmation link");
-                navigate({ to: "/" });
+                navigate({ to: "/login" });
                 return;
             }
 
-            await api.get("/accounts/confirm-email", {
-                params: { email, token }
-            });
+            try {
+                await api.get("/accounts/confirm-email", {
+                    params: { email, token }
+                });
 
-            toast.success("Your email has been confirmed!");
-            navigate({ to: "/" });
+                toast.success("Your email has been confirmed!");
+                navigate({ to: "/login" });
+            } catch {
+                toast.error("Email confirmation failed.");
+                navigate({ to: "/login" });
+            }
         };
 
         submitEmailConfirmation();
-    }, [email, token]);
-
+    }, [email, token, navigate]);
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-muted">
