@@ -4,6 +4,7 @@ using LabAnalysisAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LabAnalysisAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220025006_AllergyConditionMedicationTables")]
+    partial class AllergyConditionMedicationTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,75 +57,6 @@ namespace LabAnalysisAPI.Migrations
                     b.HasKey("ConditionId");
 
                     b.ToTable("Conditions");
-                });
-
-            modelBuilder.Entity("LabAnalysisAPI.Models.Lab", b =>
-                {
-                    b.Property<int>("LabId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LabId"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsNumeric")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReferenceRange")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Unit")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("LabId");
-
-                    b.ToTable("Labs");
-                });
-
-            modelBuilder.Entity("LabAnalysisAPI.Models.LabReport", b =>
-                {
-                    b.Property<int>("LabReportId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LabReportId"));
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FilePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("TestDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("UploadDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("LabReportId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("LabReports");
                 });
 
             modelBuilder.Entity("LabAnalysisAPI.Models.Medication", b =>
@@ -193,47 +127,6 @@ namespace LabAnalysisAPI.Migrations
                     b.HasIndex("ConditionId");
 
                     b.ToTable("UserConditions");
-                });
-
-            modelBuilder.Entity("LabAnalysisAPI.Models.UserLabResult", b =>
-                {
-                    b.Property<int>("UserLabResultId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserLabResultId"));
-
-                    b.Property<bool?>("IsAbnormal")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LabId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LabReportId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResultValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Unit")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserLabResultId");
-
-                    b.HasIndex("LabId");
-
-                    b.HasIndex("LabReportId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserLabResults");
                 });
 
             modelBuilder.Entity("LabAnalysisAPI.Models.UserMedication", b =>
@@ -510,17 +403,6 @@ namespace LabAnalysisAPI.Migrations
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
-            modelBuilder.Entity("LabAnalysisAPI.Models.LabReport", b =>
-                {
-                    b.HasOne("LabAnalysisAPI.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("LabAnalysisAPI.Models.UserAllergy", b =>
                 {
                     b.HasOne("LabAnalysisAPI.Models.Allergy", "Allergy")
@@ -555,33 +437,6 @@ namespace LabAnalysisAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Condition");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("LabAnalysisAPI.Models.UserLabResult", b =>
-                {
-                    b.HasOne("LabAnalysisAPI.Models.Lab", "Lab")
-                        .WithMany("UserLabResults")
-                        .HasForeignKey("LabId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LabAnalysisAPI.Models.LabReport", "LabReport")
-                        .WithMany("UserLabResults")
-                        .HasForeignKey("LabReportId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("LabAnalysisAPI.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lab");
-
-                    b.Navigation("LabReport");
 
                     b.Navigation("User");
                 });
@@ -654,16 +509,6 @@ namespace LabAnalysisAPI.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("LabAnalysisAPI.Models.Lab", b =>
-                {
-                    b.Navigation("UserLabResults");
-                });
-
-            modelBuilder.Entity("LabAnalysisAPI.Models.LabReport", b =>
-                {
-                    b.Navigation("UserLabResults");
                 });
 #pragma warning restore 612, 618
         }
