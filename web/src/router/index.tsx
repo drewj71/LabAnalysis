@@ -19,6 +19,7 @@ import ResetPassword from '@/pages/auth/ResetPassword'
 import EmailConfirmation from '@/pages/auth/EmailConfirmation'
 
 // App pages
+import Onboarding from '@/pages/auth/Onboarding'
 import { Dashboard } from '@/pages/app/Dashboard'
 import { Accounts } from '@/pages/app/Accounts'
 import { Budgets } from '@/pages/app/Budgets'
@@ -41,9 +42,9 @@ const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'landing',
   component: () => {
-    const { token } = useAuth()
+    const { token, user } = useAuth()
 
-    if (token) {
+    if (token && user?.isOnboarded) {
       return <Navigate to="/dashboard" />
     }
 
@@ -103,6 +104,12 @@ const appRoute = createRoute({
   },
 })
 
+const onboardingRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: 'onboarding',
+  component: Onboarding,
+})
+
 const dashboardRoute = createRoute({
   getParentRoute: () => appRoute,
   path: 'dashboard',
@@ -145,6 +152,7 @@ const routeTree = rootRoute.addChildren([
     emailConfirmationRoute,
   ]),
   appRoute.addChildren([
+    onboardingRoute,
     dashboardRoute,
     accountsRoute,
     budgetsRoute,

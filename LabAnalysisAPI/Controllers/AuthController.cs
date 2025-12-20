@@ -15,12 +15,12 @@ namespace LabAnalysisAPI.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
         private readonly FrontendOptions _frontend;
         private readonly IEmailService _emailService;
 
-        public AuthController(UserManager<IdentityUser> userManager, IConfiguration config, IOptions<FrontendOptions> frontendOptions, IEmailService emailService)
+        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration config, IOptions<FrontendOptions> frontendOptions, IEmailService emailService)
         {
             _userManager = userManager;
             _config = config;
@@ -38,10 +38,14 @@ namespace LabAnalysisAPI.Controllers
             if (existingUser != null)
                 return BadRequest("User with this email already exists.");
 
-            var newUser = new IdentityUser
+            var newUser = new ApplicationUser
             {
                 UserName = dto.Email,
-                Email = dto.Email
+                Email = dto.Email,
+                IsOnboarded = false,
+                OnboardingStep = 0,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(newUser, dto.Password);
@@ -137,13 +141,17 @@ namespace LabAnalysisAPI.Controllers
             return Ok("Password has been reset successfully.");
         }
 
-        private string GenerateJwtToken(IdentityUser user)
+        private string GenerateJwtToken(ApplicationUser user)
         {
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(ClaimTypes.NameIdentifier, user.Id),
                 new(JwtRegisteredClaimNames.Email, user.Email!),
                 new("emailConfirmed", user.EmailConfirmed.ToString()),
+                new("firstName", user.FirstName ?? ""),
+                new("lastName", user.LastName ?? ""),
+                new("isOnboarded", user.IsOnboarded.ToString()),
+                new("onboardingStep", user.OnboardingStep.ToString()),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
@@ -166,6 +174,5 @@ namespace LabAnalysisAPI.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
     }
 }

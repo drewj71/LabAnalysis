@@ -41,7 +41,7 @@ export function RegisterForm() {
     try {
       await registerUser(data.email, data.password, data.confirmPassword);
       toast.success("Please check your email to confirm your account.");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/onboarding" });
     } catch (err: AxiosError | any) {
       if (err.response?.data) {
         const data = err.response.data;

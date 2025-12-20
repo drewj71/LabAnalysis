@@ -35,7 +35,7 @@ export function ResetPasswordForm() {
   });
 
   const navigate = useNavigate();
-  const search = useSearch({ from: '/reset-password' }) as ResetPasswordSearch;
+  const search = useSearch({ from: '/reset-password' as any }) as ResetPasswordSearch;
   const { email, token } = search;
 
   const passwordValue = watch("password");

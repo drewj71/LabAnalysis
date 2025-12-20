@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
+  setUser: (user: AuthUser | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const jwt = res.data.token;
     localStorage.setItem("authToken", jwt);
     setToken(jwt);
+    setAuthToken(jwt);
   };
 
   const register = async (email: string, password: string, confirmPassword: string) => {
@@ -47,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const jwt = res.data.token;
     localStorage.setItem("authToken", jwt);
     setToken(jwt);
+    setAuthToken(jwt);
   };
 
   const logout = () => {
@@ -56,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, register, logout }}>
+    <AuthContext.Provider value={{ token, user, login, register, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

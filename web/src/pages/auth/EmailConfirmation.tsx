@@ -16,7 +16,7 @@ interface EmailConfirmationSearch {
 
 export default function EmailConfirmation() {
     const navigate = useNavigate();
-    const search = useSearch({ from: '/confirm-email' }) as EmailConfirmationSearch;
+    const search = useSearch({ from: '/confirm-email' as any }) as EmailConfirmationSearch;
     const { email, token } = search;
     const hasSubmittedRef = React.useRef(false);
 
@@ -32,7 +32,7 @@ export default function EmailConfirmation() {
             }
 
             try {
-                await api.get("/accounts/confirm-email", {
+                await api.get("/user/confirm-email", {
                     params: { email, token }
                 });
 

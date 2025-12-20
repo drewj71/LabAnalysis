@@ -3,32 +3,31 @@ using LabAnalysisAPI.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
-using System.Net;
 using Microsoft.AspNetCore.WebUtilities;
 using LabAnalysisAPI.Services.Email;
+using LabAnalysisAPI.Services.User;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 namespace LabAnalysisAPI.Controllers
 {
     [ApiController]
-    [Route("api/accounts")]
+    [Route("api/user")]
     [Authorize]
-    public class AccountsController : ControllerBase
+    public class UserController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _db;
         private readonly FrontendOptions _frontend;
         private readonly IEmailService _emailService;
+        private readonly IUserService _userService;
 
-        public AccountsController(UserManager<IdentityUser> userManager, AppDbContext db, IOptions<FrontendOptions> frontendOptions, IEmailService emailService)
+        public UserController(UserManager<ApplicationUser> userManager, AppDbContext db, IOptions<FrontendOptions> frontendOptions, IEmailService emailService, IUserService userService)
         {
             _userManager = userManager;
             _db = db;
+            _userService = userService;
             _frontend = frontendOptions.Value;
             _emailService = emailService;
         }
@@ -79,36 +78,24 @@ namespace LabAnalysisAPI.Controllers
             return Ok("Email confirmation link sent successfully.");
         }
 
+        [HttpPost("onboarding/{stepId}")]
+        public async Task<IActionResult> SubmitOnboardingStep(string stepId, [FromForm] OnboardingStepRequest request)
+        {
+            var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
 
-        // [HttpGet("user-accounts")]
-        // public async Task<IActionResult> GetUserAccounts()
-        // {
-        //     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //     if (string.IsNullOrEmpty(userId))
-        //         return Unauthorized("User ID not found in token.");
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null) return NotFound();
 
-        //     var userAccounts = await _db.PlaidAccounts
-        //         .Include(a => a.UserPlaidAccount)
-        //         .Where(a => a.UserPlaidAccount.UserId == userId)
-        //         .ToListAsync();
-        //     return Ok(userAccounts);
-        // }
-
-        // [HttpGet("user-transactions")]
-        // public async Task<IActionResult> GetUserTransactions()
-        // {
-        //     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //     if (string.IsNullOrEmpty(userId))
-        //         return Unauthorized();
-
-        //     var transactions = await _db.Transactions
-        //         .Include(t => t.TransactionCategory)
-        //         .Where(t => t.UserId == userId)
-        //         .OrderByDescending(t => t.Date)
-        //         .ToListAsync();
-
-        //     return Ok(transactions);
-        // }
-
+            try
+            {
+                await _userService.SubmitOnboardingStepAsync(user, stepId, request);
+                return Ok(new { message = "Step submitted successfully.", onboardingStep = user.OnboardingStep });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

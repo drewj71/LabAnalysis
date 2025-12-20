@@ -28,6 +28,25 @@ namespace LabAnalysisAPI.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<ApplicationUser>(entity =>
+            {
+                entity.Property(u => u.IsOnboarded)
+                    .HasDefaultValue(false)
+                    .IsRequired();
+
+                entity.Property(u => u.OnboardingStep)
+                    .HasDefaultValue(0)
+                    .IsRequired();
+
+                entity.Property(u => u.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()")
+                    .IsRequired()
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(u => u.UpdatedAt)
+                    .IsRequired();
+            });
+
             builder.Entity<UserAllergy>()
                 .HasKey(ua => new { ua.UserId, ua.AllergyId });
 
