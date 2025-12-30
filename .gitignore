@@ -57,6 +57,7 @@ Migrations/*ModelSnapshot.cs
 *.log
 *.cache
 LabAnalysisAPI/appsettings.json
+LabAnalysisAPI/Uploads/
 
 # =========================
 # React Native / Expo / Mobile

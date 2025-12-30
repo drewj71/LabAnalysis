@@ -1,5 +1,14 @@
 namespace LabAnalysisAPI.Models
 {
+    public enum LabProcessingStatus
+    {
+        Uploaded,
+        TextExtracted,
+        Parsed,
+        Analyzed,
+        Failed
+    }
+
     public class LabReport
     {
         public int LabReportId { get; set; } // PK
@@ -14,6 +23,11 @@ namespace LabAnalysisAPI.Models
         public string? FileType { get; set; } // file type (e.g., PDF, JPEG)
         public string? Source { get; set; } // lab name or system
         public string? Notes { get; set; }
+        public string? RawText { get; set; }
+        public string? NormalizedText { get; set; }
+        public bool ExtractionSuccessful { get; set; } = false;
+        public string? ExtractionError { get; set; }
+        public LabProcessingStatus ProcessingStatus { get; set; } = LabProcessingStatus.Uploaded;
 
         public ICollection<UserLabResult> UserLabResults { get; set; } = new List<UserLabResult>();
     }

@@ -4,6 +4,7 @@ using LabAnalysisAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LabAnalysisAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251222172438_FixAllergyMedsConditionRelations")]
+    partial class FixAllergyMedsConditionRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,12 +96,6 @@ namespace LabAnalysisAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LabReportId"));
 
-                    b.Property<string>("ExtractionError")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("ExtractionSuccessful")
-                        .HasColumnType("bit");
-
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
@@ -108,16 +105,7 @@ namespace LabAnalysisAPI.Migrations
                     b.Property<string>("FileType")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NormalizedText")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProcessingStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RawText")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Source")
@@ -152,7 +140,7 @@ namespace LabAnalysisAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Type")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.HasKey("MedicationId");
@@ -169,9 +157,10 @@ namespace LabAnalysisAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Severity")
+                    b.Property<int>("Severity")
                         .HasColumnType("int");
 
                     b.HasKey("UserId", "AllergyId");
@@ -193,6 +182,7 @@ namespace LabAnalysisAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Notes")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Severity")

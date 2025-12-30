@@ -11,6 +11,6 @@ namespace LabAnalysisAPI.Models
     {
         public int MedicationId { get; set; }
         public string MedicationName { get; set; }
-        public MedicationType Type { get; set; }
+        public MedicationType? Type { get; set; }
     }
 }

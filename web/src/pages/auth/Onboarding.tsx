@@ -16,7 +16,8 @@ const Onboarding: React.FC = () => {
 
     const handleStepSubmit = async (formData: FormData) => {
         try {
-            await api.post(`/user/onboarding/${currentStep.id}`, formData, {
+            var endpoint = currentStepIndex < 2 ? `/user/onboarding/${currentStep.id}` : `/lab/upload-lab`;
+            await api.post(endpoint, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

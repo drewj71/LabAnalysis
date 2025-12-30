@@ -2,6 +2,8 @@ using LabAnalysisAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using LabAnalysisAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace LabAnalysisAPI.Services.User
 {
@@ -23,6 +25,19 @@ namespace LabAnalysisAPI.Services.User
 
         public async Task SubmitOnboardingStepAsync(ApplicationUser user, string stepId, OnboardingStepRequest request)
         {
+            var medications = string.IsNullOrWhiteSpace(request.MedicationsJson)
+                ? new List<MedicationRequest>()
+                : JsonSerializer.Deserialize<List<MedicationRequest>>(
+                    request.MedicationsJson,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } }
+                );
+
+            var conditions = string.IsNullOrWhiteSpace(request.MedicalConditionsJson)
+                ? new List<ConditionRequest>()
+                : JsonSerializer.Deserialize<List<ConditionRequest>>(
+                    request.MedicalConditionsJson,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } }
+                );
             switch (stepId.ToLower())
             {
                 case "profile":
@@ -57,41 +72,46 @@ namespace LabAnalysisAPI.Services.User
                         }
                     }
 
-                    if (request.Medications != null)
+                    if (medications != null)
                     {
-                        foreach (var medication in request.Medications)
+                        foreach (var medication in medications)
                         {
-                            var medicationEntity = _dbContext.Medications.FirstOrDefault(m => m.MedicationName == medication);
+                            var medicationEntity = await _dbContext.Medications.FirstOrDefaultAsync(m => m.MedicationName == medication.Name.Trim().ToUpper());
                             if (medicationEntity == null)
                             {
-                                medicationEntity = new Medication { MedicationName = medication };
+                                medicationEntity = new Medication { MedicationName = medication.Name.Trim().ToUpper() };
                                 _dbContext.Medications.Add(medicationEntity);
                                 await _dbContext.SaveChangesAsync();
                             }
                             var userMedication = new UserMedication
                             {
                                 UserId = user.Id,
-                                MedicationId = medicationEntity.MedicationId
+                                MedicationId = medicationEntity.MedicationId,
+                                Dosage = medication.Dosage,
+                                Frequency = medication.Frequency,
                             };
                             _dbContext.UserMedications.Add(userMedication);
                         }
                     }
 
-                    if (request.MedicalConditions != null)
+                    if (conditions != null)
                     {
-                        foreach (var condition in request.MedicalConditions)
+                        foreach (var condition in conditions)
                         {
-                            var conditionEntity = _dbContext.Conditions.FirstOrDefault(c => c.ConditionName == condition);
+                            var conditionEntity = await _dbContext.Conditions.FirstOrDefaultAsync(c => c.ConditionName == condition.Name.Trim().ToUpper());
                             if (conditionEntity == null)
                             {
-                                conditionEntity = new Condition { ConditionName = condition };
+                                conditionEntity = new Condition { ConditionName = condition.Name.Trim().ToUpper() };
                                 _dbContext.Conditions.Add(conditionEntity);
                                 await _dbContext.SaveChangesAsync();
                             }
                             var userCondition = new UserCondition
                             {
                                 UserId = user.Id,
-                                ConditionId = conditionEntity.ConditionId
+                                ConditionId = conditionEntity.ConditionId,
+                                DiagnosisDate = condition.DiagnosisDate,
+                                Status = condition.Status,
+                                Severity = condition.Severity,
                             };
                             _dbContext.UserConditions.Add(userCondition);
                         }

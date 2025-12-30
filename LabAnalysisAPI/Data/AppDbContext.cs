@@ -52,7 +52,7 @@ namespace LabAnalysisAPI.Data
 
             builder.Entity<UserAllergy>()
                 .HasOne(ua => ua.User)
-                .WithMany()
+                .WithMany(u => u.UserAllergies) 
                 .HasForeignKey(ua => ua.UserId);
 
             builder.Entity<UserAllergy>()
@@ -65,7 +65,7 @@ namespace LabAnalysisAPI.Data
 
             builder.Entity<UserCondition>()
                 .HasOne(uc => uc.User)
-                .WithMany()
+                .WithMany(u => u.UserConditions)
                 .HasForeignKey(uc => uc.UserId);
 
             builder.Entity<UserCondition>()
@@ -78,7 +78,7 @@ namespace LabAnalysisAPI.Data
 
             builder.Entity<UserMedication>()
                 .HasOne(um => um.User)
-                .WithMany()
+                .WithMany(u => u.UserMedications)
                 .HasForeignKey(um => um.UserId);
 
             builder.Entity<UserMedication>()

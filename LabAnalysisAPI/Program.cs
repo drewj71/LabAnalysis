@@ -2,7 +2,10 @@
 using LabAnalysisAPI.Data;
 using LabAnalysisAPI.Models;
 using LabAnalysisAPI.Services.Email;
+using LabAnalysisAPI.Services.Pdf;
 using LabAnalysisAPI.Services.User;
+using LabAnalysisAPI.Services.Lab;
+using LabAnalysisAPI.Services.Parsing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -60,7 +63,11 @@ builder.Services.AddHttpClient<IEmailService, BrevoEmailService>(client =>
 });
 builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection("Frontend"));
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+builder.Services.Configure<BackendOptions>(builder.Configuration.GetSection("Backend"));
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPdfTextExtractionService, PdfTextExtractionService>();
+builder.Services.AddScoped<ILabService, LabService>();
+builder.Services.AddScoped<ILabParsingService, LabParsingService>();
 
 builder.Services.AddCors(options =>
 {

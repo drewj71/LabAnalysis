@@ -18,15 +18,13 @@ namespace LabAnalysisAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AppDbContext _db;
         private readonly FrontendOptions _frontend;
         private readonly IEmailService _emailService;
         private readonly IUserService _userService;
 
-        public UserController(UserManager<ApplicationUser> userManager, AppDbContext db, IOptions<FrontendOptions> frontendOptions, IEmailService emailService, IUserService userService)
+        public UserController(UserManager<ApplicationUser> userManager, IOptions<FrontendOptions> frontendOptions, IEmailService emailService, IUserService userService)
         {
             _userManager = userManager;
-            _db = db;
             _userService = userService;
             _frontend = frontendOptions.Value;
             _emailService = emailService;

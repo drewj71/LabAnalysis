@@ -20,9 +20,9 @@ namespace LabAnalysisAPI.Models
         public ApplicationUser User { get; set; }
         public int ConditionId { get; set; }
         public Condition Condition { get; set; }
-        public DateTime DiagnosisDate { get; set; }
-        public ConditionStatus Status { get; set; } = ConditionStatus.Active;
-        public ConditionSeverity Severity { get; set; }
-        public string Notes { get; set; }
+        public DateTime? DiagnosisDate { get; set; }
+        public ConditionStatus? Status { get; set; }
+        public ConditionSeverity? Severity { get; set; }
+        public string? Notes { get; set; }
     }
 }

@@ -32,3 +32,37 @@ export interface OnboardingFormProps {
   defaultValues?: Record<string, any>; 
   onSubmit: (formData: FormData) => void | Promise<void>;
 }
+
+export type OnboardingFormValues = {
+  // Profile
+  firstName: string
+  lastName: string
+  gender: string
+  dateOfBirth: string
+  height?: number
+  weight?: number
+
+  // Medical
+  allergies?: string[]
+  medicalConditions?: Condition[]
+  medications: Medication[]
+
+  // Upload
+  labReport?: File
+}
+
+export type Medication = {
+  name: string
+  dosage?: number
+  unit?: "mg" | "mcg" | "g" | "ml"
+  frequency?: "Once daily" | "Twice daily" | "As needed"
+}
+
+
+export type Condition = {
+  name: string
+  status?: "active" | "recovered" | "chronic"
+  severity?: "mild" | "moderate" | "severe"
+  diagnosisDate?: string
+  notes?: string
+} 

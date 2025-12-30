@@ -40,10 +40,10 @@ export const onboardingSteps = [
     title: "Medical Information",
     description: "Provide your medical information.",
     fields: [
-      { id: "allergies", label: "Allergies", type: "text" },
-      { id: "medications", label: "Medications", type: "text" },
       { id: "bloodType", label: "Blood Type", type: "select", options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
-      { id: "medicalConditions", label: "Medical Conditions", type: "text" },
+      { id: "allergies", label: "Allergies", type: "text" },
+      { id: "medications", label: "Medications", type: "medication-list" },
+      { id: "medicalConditions", label: "Medical Conditions", type: "condition-list" },
     ],
   }, 
   {

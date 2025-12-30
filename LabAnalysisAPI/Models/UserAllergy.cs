@@ -13,7 +13,7 @@ namespace LabAnalysisAPI.Models
         public ApplicationUser User { get; set; }
         public int AllergyId { get; set; }
         public Allergy Allergy { get; set; }
-        public AllergySeverity Severity { get; set; }
-        public string Notes { get; set; }
+        public AllergySeverity? Severity { get; set; }
+        public string? Notes { get; set; }
     }
 }
